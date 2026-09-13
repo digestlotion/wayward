@@ -34,7 +34,9 @@ func main() {
 
 	log.Println("listening on :8080")
 	http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s %s", r.Method, r.URL.Path)
+		log.Printf("\033[33m%-4s\033[0m \033[34m%s\033[0m",
+			r.Method, r.URL.Path,
+		)
 		mux.ServeHTTP(w, r)
 	}))
 }
