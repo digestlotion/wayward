@@ -2,6 +2,7 @@ package com.wayward.waywardforge;
 
 import com.mojang.logging.LogUtils;
 import com.wayward.waywardcommon.Wayward;
+import com.wayward.waywardcommon.WaywardEntrypoints;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -25,10 +26,10 @@ public final class WaywardForge {
     }
 
     private void onServerStarting(ServerStartingEvent event) {
-        Wayward.onServerStart(event.getServer());
+        WaywardEntrypoints.onServerStart(event.getServer());
     }
 
     private void onServerStopped(ServerStoppedEvent event) {
-        Wayward.onServerStop(event.getServer());
+        WaywardEntrypoints.onServerStop(event.getServer());
     }
 }
