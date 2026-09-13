@@ -55,7 +55,7 @@ public final class Wayward {
     }
 
     public static void onServerStart(MinecraftServer server) {
-        new Thread(() -> pull(server)).start();
+        pull(server);
     }
 
     public static void onServerStop(MinecraftServer server) {
