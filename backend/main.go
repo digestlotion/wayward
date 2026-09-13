@@ -34,11 +34,22 @@ func main() {
 
 	log.Println("listening on :8080")
 	http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("\033[33m%-4s\033[0m \033[34m%s\033[0m",
-			r.Method, r.URL.Path,
+		lw := &statusWriter{w, 200}
+		mux.ServeHTTP(lw, r)
+		log.Printf("\033[33m%-4s\033[0m \033[32m%d\033[0m \033[34m%s\033[0m %s",
+			r.Method, lw.status, r.RemoteAddr, r.URL.RequestURI(),
 		)
-		mux.ServeHTTP(w, r)
 	}))
+}
+
+type statusWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (sw *statusWriter) WriteHeader(code int) {
+	sw.status = code
+	sw.ResponseWriter.WriteHeader(code)
 }
 
 func auth(w http.ResponseWriter, r *http.Request) {
