@@ -1,11 +1,10 @@
 package com.wayward.waywardforge;
 
-import com.mojang.logging.LogUtils;
 import com.wayward.waywardcommon.Wayward;
 import com.wayward.waywardcommon.WaywardEntrypoints;
 
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -21,11 +20,10 @@ public final class WaywardForge {
     }
 
     private void setup(FMLClientSetupEvent event) {
-        LogUtils.getLogger().info("SETUP!!!");
         Wayward.init();
     }
 
-    private void onServerStarting(ServerStartingEvent event) {
+    private void onServerStarting(ServerAboutToStartEvent event) {
         WaywardEntrypoints.onServerStart(event.getServer());
     }
 
