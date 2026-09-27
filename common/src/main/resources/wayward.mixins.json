@@ -3,7 +3,7 @@
   "package": "com.wayward.waywardcommon.mixin",
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
-  "client": [],
+  "client": ["ScreenInvoker"],
   "mixins": [],
   "injectors": {
     "defaultRequire": 1
