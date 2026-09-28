@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+	"uuid"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -30,8 +31,14 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewDecoder(resp.Body).Decode(&profile)
 
+	u, err := uuid.Parse(profile.ID)
+	if err != nil {
+		return
+	}
+	uuid := u.String()
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"uuid": profile.ID,
+		"uuid": uuid,
 		"exp":  time.Now().Add(24 * time.Hour).Unix(),
 	})
 	signed, err := token.SignedString([]byte(SECRET))

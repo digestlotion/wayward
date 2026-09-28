@@ -31,8 +31,4 @@ public final class Wayward {
         return getGameDir().resolve("config/wayward.json").toFile();
     }
 
-    public static String getUuid() {
-        return minecraft.getUser().getProfileId().toString();
-    }
-
 }

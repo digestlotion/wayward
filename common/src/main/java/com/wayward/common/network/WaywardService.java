@@ -49,7 +49,8 @@ public class WaywardService {
         }
     }
 
-    private static void pull(Path path, String uuid) {
+    private static boolean pull(Path path, String uuid) {
+        boolean b = true;
         try {
             for (String rel : getDiff(path, uuid)) {
                 HttpResponse<byte[]> fileResponse = HTTP.send(
@@ -68,7 +69,11 @@ public class WaywardService {
                         .build(),
                     HttpResponse.BodyHandlers.ofByteArray()
                 );
-                if (fileResponse.statusCode() != 200) continue;
+                if (fileResponse.statusCode() != 200) {
+                    b = false;
+                    continue;
+                }
+
                 Path target = path.resolve(rel);
                 Files.createDirectories(target.getParent());
                 Files.write(target, fileResponse.body());
@@ -76,14 +81,16 @@ public class WaywardService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return b;
     }
 
-    private static void push(Path path, String uuid) {
+    private static boolean push(Path path, String uuid) {
+                boolean b = true;
         try {
             for (String rel : getDiff(path, uuid)) {
                 Path file = path.resolve(rel);
                 if (!Files.exists(file)) continue;
-                HTTP.send(
+                HttpResponse<String> fileResponse = HTTP.send(
                     HttpRequest.newBuilder()
                         .uri(
                             new URI(
@@ -100,10 +107,15 @@ public class WaywardService {
                         .build(),
                     HttpResponse.BodyHandlers.ofString()
                 );
+                if (fileResponse.statusCode() != 204) {
+                    b = false;
+                    continue;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return b;
     }
 
     private static Map<String, String> buildManifest(Path worldPath) throws Exception {
@@ -179,9 +191,10 @@ public class WaywardService {
             if (uuid.isEmpty() || world.isEmpty()) return; // TODO: handle this properly
             Path worldPath = Wayward.getSavesDir().resolve(world);
             Files.createDirectories(worldPath);
-            pull(worldPath, uuid); // TODO: handle this thing failing before setting config
-            Config.worlds.put(world, uuid);
-            Config.save();
+            if (pull(worldPath, uuid)) {
+                Config.worlds.put(world, uuid);
+                Config.save();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -191,9 +204,10 @@ public class WaywardService {
         Path worldPath = Wayward.getSavesDir().resolve(world);
         if (Files.exists(worldPath)) {
             String uuid = Minecraft.getInstance().getUser().getProfileId().toString();
-            push(worldPath, uuid);
-            Config.worlds.put(world, uuid);
-            Config.save();
+            if (push(worldPath, uuid)) {
+                Config.worlds.put(world, uuid);
+                Config.save();
+            }
         }
     }
 
