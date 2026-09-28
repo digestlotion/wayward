@@ -1,10 +1,10 @@
-package com.wayward.waywardcommon.network;
+package com.wayward.common.network;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import com.wayward.waywardcommon.Config;
-import com.wayward.waywardcommon.Wayward;
+import com.wayward.common.Config;
+import com.wayward.common.Wayward;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -28,12 +28,12 @@ public class WaywardService {
     private static final List<String> ALLOWED_FILES = List.of(".dat", ".dat_old", ".mca", ".json", ".png");
 
     public static void auth() {
-        Minecraft client = Minecraft.getInstance();
-        User user = client.getUser();
+        Minecraft mc = Minecraft.getInstance();
+        User user = mc.getUser();
 
         String serverId = UUID.randomUUID().toString();
         try {
-            client.getMinecraftSessionService().joinServer(user.getGameProfile(), user.getAccessToken(), serverId);
+            mc.services().sessionService().joinServer(user.getProfileId(), user.getAccessToken(), serverId);
             HttpResponse<String> response = HTTP.send(
                 HttpRequest.newBuilder()
                     .uri(URI.create(String.format("%s/auth?username=%s&serverId=%s", URI.create(Config.url), user.getName(), serverId)))
@@ -190,7 +190,7 @@ public class WaywardService {
     public static void addWorld(String world) {
         Path worldPath = Wayward.getSavesDir().resolve(world);
         if (Files.exists(worldPath)) {
-            String uuid = Minecraft.getInstance().getUser().getUuid();
+            String uuid = Minecraft.getInstance().getUser().getProfileId().toString();
             push(worldPath, uuid);
             Config.worlds.put(world, uuid);
             Config.save();

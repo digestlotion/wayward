@@ -1,4 +1,4 @@
-package com.wayward.waywardcommon.mixin;
+package com.wayward.common.mixin;
 
 
 import org.spongepowered.asm.mixin.Mixin;

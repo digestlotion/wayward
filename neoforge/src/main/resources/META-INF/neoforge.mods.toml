@@ -1,7 +1,7 @@
 modLoader = "javafml"
-loaderVersion = "[47,)"
+loaderVersion = "[1,)"
 #issueTrackerURL = ""
-license = "Insert License Here"
+license = "MIT"
 
 [[mods]]
 modId = "wayward"
@@ -11,18 +11,21 @@ authors = "Me!"
 description = '''
 This is an example description! Tell everyone what your mod is about!
 '''
-#logoFile = ""
+# logoFile = "assets/wayward/icon.png"
 
-[[dependencies.wayward]]
-modId = "forge"
-mandatory = true
-versionRange = "[47,)"
+[[dependencies.example_mod]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.wayward]]
+[[dependencies.example_mod]]
 modId = "minecraft"
-mandatory = true
-versionRange = "[1.20.1,)"
+type = "required"
+versionRange = "[26.,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[mixins]]
+config = "wayward.mixins.json"

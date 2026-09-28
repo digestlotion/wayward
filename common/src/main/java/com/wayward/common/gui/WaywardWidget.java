@@ -1,9 +1,9 @@
-package com.wayward.waywardcommon.gui;
+package com.wayward.common.gui;
 
-import com.wayward.waywardcommon.network.WaywardService;
+import com.wayward.common.network.WaywardService;
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -27,7 +27,7 @@ public class WaywardWidget extends AbstractContainerEventHandler implements Rend
         this.w = w;
         this.h = h;
 
-        int bW = (w / 3) - 4;
+        int bW = w / 3 - 4;
         int contentH = 20 + 4 + 20 + 8 + 20;
         int startY = y + (h - contentH) / 2;
 
@@ -83,9 +83,7 @@ public class WaywardWidget extends AbstractContainerEventHandler implements Rend
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        for (AbstractWidget child : children) {
-            child.render(guiGraphics, mouseX, mouseY, partialTick);
-        }
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        for (AbstractWidget child : children) child.extractRenderState(graphics, mouseX, mouseY, a);
     }
 }

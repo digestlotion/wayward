@@ -1,8 +1,10 @@
-package com.wayward.waywardcommon;
+package com.wayward.common;
 
-import com.wayward.waywardcommon.network.WaywardService;
 import java.io.File;
 import java.nio.file.Path;
+
+import com.wayward.common.network.WaywardService;
+
 import net.minecraft.client.Minecraft;
 
 public final class Wayward {
@@ -15,10 +17,10 @@ public final class Wayward {
         WaywardService.auth();
     }
 
-    private static final Minecraft client = Minecraft.getInstance();
+    private static final Minecraft minecraft = Minecraft.getInstance();
 
     public static Path getGameDir() {
-        return client.gameDirectory.toPath();
+        return minecraft.gameDirectory.toPath();
     }
 
     public static Path getSavesDir() {
@@ -27,6 +29,10 @@ public final class Wayward {
 
     public static File getConf() {
         return getGameDir().resolve("config/wayward.json").toFile();
+    }
+
+    public static String getUuid() {
+        return minecraft.getUser().getProfileId().toString();
     }
 
 }

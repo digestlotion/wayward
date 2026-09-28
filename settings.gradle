@@ -7,8 +7,8 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'wayward'
+rootProject.name = 'example_mod'
 
 include 'common'
 include 'fabric'
-include 'forge'
+include 'neoforge'

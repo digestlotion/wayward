@@ -9,21 +9,18 @@
     "homepage": "https://fabricmc.net/",
     "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/wayward/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [],
-    "client": ["com.wayward.waywardfabric.WaywardFabric"]
+    "client": ["com.wayward.fabric.WaywardFabric"]
   },
   "mixins": ["wayward.mixins.json"],
   "depends": {
     "fabricloader": ">=0.19.5",
-    "minecraft": "~1.20.1",
-    "java": ">=17",
+    "minecraft": "~26.3",
+    "java": ">=25",
     "fabric-api": "*"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }

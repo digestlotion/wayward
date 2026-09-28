@@ -1,4 +1,4 @@
-package com.wayward.waywardcommon;
+package com.wayward.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
