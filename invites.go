@@ -27,8 +27,6 @@ func (s *InviteStore) Add(owner, world, friend string) {
 	if !slices.Contains(s.data[k], friend) {
 		s.data[k] = append(s.data[k], friend)
 	}
-	println(s.data[k][0])
-	println(slices.Contains(s.data[k], friend))
 }
 
 func (s *InviteStore) HasAccess(owner, world, requester string) bool {
@@ -46,6 +44,10 @@ func invite(w http.ResponseWriter, r *http.Request) {
 	owner, err := authenticate(r)
 	if err != nil {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if owner == "SUPER" {
+		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
 

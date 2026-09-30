@@ -25,12 +25,16 @@ func safePath(uuid, rel string) (string, error) {
 }
 
 func hashFile(path string) (string, error) {
-	data, err := os.ReadFile(path)
+	f, err := os.Open(path)
 	if err != nil {
 		return "", err
 	}
-	sum := sha256.Sum256(data)
-	return hex.EncodeToString(sum[:]), nil
+	defer f.Close()
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func worldOf(path string) string {
@@ -38,24 +42,6 @@ func worldOf(path string) string {
 		return path[:i]
 	}
 	return path
-}
-
-func authorizeRequest(w http.ResponseWriter, r *http.Request) (uuid, path string, ok bool) {
-	requester, err := authenticate(r)
-	if err != nil {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return "", "", false
-	}
-
-	uuid = r.PathValue("uuid")
-	path = r.PathValue("path")
-
-	if !invites.HasAccess(uuid, worldOf(path), requester) {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return "", "", false
-	}
-
-	return uuid, path, true
 }
 
 func manifest(w http.ResponseWriter, r *http.Request) {
@@ -73,9 +59,11 @@ func manifest(w http.ResponseWriter, r *http.Request) {
 
 	diff := []string{}
 
+	base, _ := safePath(uuid, worldPath)
+
 	for rel, clientHash := range clientManifest {
 		full, err := safePath(uuid, filepath.Join(worldPath, rel))
-		if err != nil {
+		if err != nil || !strings.HasPrefix(full, base+string(filepath.Separator)) {
 			continue
 		}
 		serverHash, err := hashFile(full)
@@ -84,9 +72,8 @@ func manifest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	base, _ := safePath(uuid, worldPath)
 	filepath.WalkDir(base, func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+		if err != nil || d.IsDir() || strings.HasPrefix(d.Name(), ".upload-") {
 			return nil
 		}
 		rel := filepath.ToSlash(strings.TrimPrefix(path, base+string(filepath.Separator)))
@@ -117,7 +104,10 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.MkdirAll(filepath.Dir(full), 0755)
+	if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
+		http.Error(w, "failed to write file", http.StatusInternalServerError)
+		return
+	}
 	r.Body = http.MaxBytesReader(w, r.Body, 50*1024*1024)
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -125,7 +115,26 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.WriteFile(full, data, 0644)
+	tmp, err := os.CreateTemp(filepath.Dir(full), ".upload-*")
+	if err != nil {
+		http.Error(w, "failed to write file", http.StatusInternalServerError)
+		return
+	}
+	_, err = tmp.Write(data)
+	if cerr := tmp.Close(); err == nil {
+		err = cerr
+	}
+	if err == nil {
+		err = os.Chmod(tmp.Name(), 0644)
+	}
+	if err == nil {
+		err = os.Rename(tmp.Name(), full)
+	}
+	if err != nil {
+		os.Remove(tmp.Name())
+		http.Error(w, "failed to write file", http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -141,12 +150,17 @@ func downloadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := os.ReadFile(full)
+	f, err := os.Open(full)
 	if err != nil {
+		http.Error(w, "file not found", http.StatusNotFound)
+		return
+	}
+	defer f.Close()
+	if info, err := f.Stat(); err != nil || info.IsDir() {
 		http.Error(w, "file not found", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Write(data)
+	io.Copy(w, f)
 }

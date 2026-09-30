@@ -1,8 +1,1 @@
-.gradle
-
-bin/
-build/
-run/
-
 .env
-data
