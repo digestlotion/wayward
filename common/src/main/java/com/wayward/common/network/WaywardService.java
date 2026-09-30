@@ -15,7 +15,6 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.server.MinecraftServer;
@@ -31,8 +30,13 @@ public class WaywardService {
         Minecraft mc = Minecraft.getInstance();
         User user = mc.getUser();
 
-        String serverId = UUID.randomUUID().toString();
         try {
+            String serverId = HTTP.send(
+                HttpRequest.newBuilder(URI.create(String.format("%s/auth", URI.create(Config.url))))
+                    .GET()
+                    .build(),
+                HttpResponse.BodyHandlers.ofString()
+            ).body();
             mc.services().sessionService().joinServer(user.getProfileId(), user.getAccessToken(), serverId);
             HttpResponse<String> response = HTTP.send(
                 HttpRequest.newBuilder()
@@ -85,7 +89,7 @@ public class WaywardService {
     }
 
     private static boolean push(Path path, String uuid) {
-                boolean b = true;
+        boolean b = true;
         try {
             for (String rel : getDiff(path, uuid)) {
                 Path file = path.resolve(rel);
@@ -187,28 +191,32 @@ public class WaywardService {
     }
 
     public static void joinWorld(String uuid, String world) {
-        try {
-            if (uuid.isEmpty() || world.isEmpty()) return; // TODO: handle this properly
-            Path worldPath = Wayward.getSavesDir().resolve(world);
-            Files.createDirectories(worldPath);
-            if (pull(worldPath, uuid)) {
-                Config.worlds.put(world, uuid);
-                Config.save();
+        new Thread(() -> {
+            try {
+                if (uuid.isEmpty() || world.isEmpty()) return; // TODO: handle this properly
+                Path worldPath = Wayward.getSavesDir().resolve(world);
+                Files.createDirectories(worldPath);
+                if (pull(worldPath, uuid)) {
+                    Config.worlds.put(world, uuid);
+                    Config.save();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        }).start();
     }
 
     public static void addWorld(String world) {
-        Path worldPath = Wayward.getSavesDir().resolve(world);
-        if (Files.exists(worldPath)) {
-            String uuid = Minecraft.getInstance().getUser().getProfileId().toString();
-            if (push(worldPath, uuid)) {
-                Config.worlds.put(world, uuid);
-                Config.save();
+        new Thread(() -> {
+            Path worldPath = Wayward.getSavesDir().resolve(world);
+            if (Files.exists(worldPath)) {
+                String uuid = Minecraft.getInstance().getUser().getProfileId().toString();
+                if (push(worldPath, uuid)) {
+                    Config.worlds.put(world, uuid);
+                    Config.save();
+                }
             }
-        }
+        }).start();
     }
 
     public static void invite(String uuid, String world) {

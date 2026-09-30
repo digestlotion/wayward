@@ -15,9 +15,9 @@ public class Config {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final File CONF = Wayward.getConf();
 
-    public static String url = "http://localhost:8080";
+    public static String url = "http://localhost";
     public static String token = "";
-    public static Map<String, String> worlds = new HashMap<>();     // TODO: world removing
+    public static Map<String, String> worlds = new HashMap<>(); // TODO: world removing
 
     public static void init() {
         try {

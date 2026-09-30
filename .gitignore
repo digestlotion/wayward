@@ -3,6 +3,3 @@
 bin/
 build/
 run/
-
-.env
-data
