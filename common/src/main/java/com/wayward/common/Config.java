@@ -15,7 +15,7 @@ public class Config {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final File CONF = Wayward.getConf();
 
-    public static String url = "http://localhost";
+    public static String url = "https://wayward-rqkb.onrender.com";
     public static String token = "";
     public static Map<String, String> worlds = new HashMap<>(); // TODO: world removing
 
